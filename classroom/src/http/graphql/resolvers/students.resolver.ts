@@ -1,9 +1,14 @@
 import { UseGuards } from '@nestjs/common';
-import { Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { AuthorizationGuard } from 'src/http/auth/authorization.guard';
-import { AuthUser, CurrentUser } from 'src/http/auth/current_user';
-import { EnrollmentsService } from 'src/services/enrollments.service';
-import { StudentsService } from 'src/services/students.service';
+import {
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+  ResolveReference,
+} from '@nestjs/graphql';
+import { EnrollmentsService } from '../../../services/enrollments.service';
+import { StudentsService } from '../../../services/students.service';
+import { AuthorizationGuard } from '../../auth/authorization.guard';
 import { Student } from '../models/student';
 
 @Resolver(() => Student)
@@ -13,11 +18,11 @@ export class StudentsResolver {
     private enrollmentsService: EnrollmentsService,
   ) {}
 
-  @Query(() => Student)
-  @UseGuards(AuthorizationGuard)
-  me(@CurrentUser() user: AuthUser) {
-    return this.studentsService.getStudentBuAuthUserId(user.sub);
-  }
+  // @Query(() => Student)
+  // @UseGuards(AuthorizationGuard)
+  // me(@CurrentUser() user: AuthUser) {
+  //   return this.studentsService.getStudentByAuthUserId(user.sub);
+  // }
 
   @Query(() => [Student])
   @UseGuards(AuthorizationGuard)
@@ -28,5 +33,10 @@ export class StudentsResolver {
   @ResolveField()
   enrollments(@Parent() student: Student) {
     return this.enrollmentsService.listEnrollmentsByStudentId(student.id);
+  }
+
+  @ResolveReference()
+  resolveReference(reference: { authUserId: string }) {
+    return this.studentsService.getStudentBuAuthUserId(reference.authUserId);
   }
 }
