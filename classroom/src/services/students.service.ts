@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaService } from '../database/prisma/prisma.service';
 
 interface CreateStudentParams {
   authUserId: string;
@@ -9,19 +9,11 @@ interface CreateStudentParams {
 export class StudentsService {
   constructor(private prisma: PrismaService) {}
 
-  createStudent({ authUserId }: CreateStudentParams) {
-    return this.prisma.student.create({
-      data: {
-        authUserId,
-      },
-    });
-  }
-
   listAllStudents() {
     return this.prisma.student.findMany();
   }
 
-  getStudentBuAuthUserId(authUserId: string) {
+  getStudentByAuthUserId(authUserId: string) {
     return this.prisma.student.findUnique({
       where: {
         authUserId,
@@ -31,7 +23,17 @@ export class StudentsService {
 
   getStudentById(id: string) {
     return this.prisma.student.findUnique({
-      where: { id },
+      where: {
+        id,
+      },
+    });
+  }
+
+  createStudent({ authUserId }: CreateStudentParams) {
+    return this.prisma.student.create({
+      data: {
+        authUserId,
+      },
     });
   }
 }

@@ -1,19 +1,19 @@
 import { UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AuthorizationGuard } from 'src/http/auth/authorization.guard';
-import { AuthUser, CurrentUser } from 'src/http/auth/current_user';
-import { CoursesService } from 'src/services/courses.service';
-import { EnrollmentsService } from 'src/services/enrollments.service';
-import { StudentsService } from 'src/services/students.service';
-import { CreateCourseInput } from '../inputs/create_course_input';
+import { CoursesService } from '../../../services/courses.service';
+import { EnrollmentsService } from '../../../services/enrollments.service';
+import { StudentsService } from '../../../services/students.service';
+import { AuthorizationGuard } from '../../auth/authorization.guard';
+import { AuthUser, CurrentUser } from '../../auth/current-user';
+import { CreateCourseInput } from '../inputs/create-course-input';
 import { Course } from '../models/course';
 
 @Resolver(() => Course)
 export class CoursesResolver {
   constructor(
     private coursesService: CoursesService,
-    private enrollmenstService: EnrollmentsService,
     private studentsService: StudentsService,
+    private enrollmentsService: EnrollmentsService,
   ) {}
 
   @Query(() => [Course])
@@ -25,15 +25,15 @@ export class CoursesResolver {
   @Query(() => Course)
   @UseGuards(AuthorizationGuard)
   async course(@Args('id') id: string, @CurrentUser() user: AuthUser) {
-    const student = await this.studentsService.getStudentBuAuthUserId(user.sub);
+    const student = await this.studentsService.getStudentByAuthUserId(user.sub);
 
     if (!student) {
       throw new Error('Student not found');
     }
 
-    const enrollment = await this.enrollmenstService.getByCourseAndStudentId({
+    const enrollment = await this.enrollmentsService.getByCourseAndStudentId({
       courseId: id,
-      studentId: user.sub,
+      studentId: student.id,
     });
 
     if (!enrollment) {

@@ -23,4 +23,5 @@ async function bootstrap() {
     console.log('[Classroom] HTTP server running!');
   });
 }
+
 bootstrap();

@@ -50,13 +50,13 @@ type Query {
 
 type Mutation {
   createProduct(data: CreateProductInput!): Product!
-  createPurchase(data: CreatePurchasetInput!): Purchase!
+  createPurchase(data: CreatePurchaseInput!): Purchase!
 }
 
 input CreateProductInput {
   title: String!
 }
 
-input CreatePurchasetInput {
+input CreatePurchaseInput {
   productId: String!
 }

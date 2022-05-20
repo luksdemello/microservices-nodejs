@@ -1,26 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma/prisma.service';
-import { KafkaService } from 'src/messaging/kafka.service';
+
+import { PrismaService } from '../database/prisma/prisma.service';
+import { KafkaService } from '../messaging/kafka.service';
 
 interface CreatePurchaseParams {
-  productId: string;
   customerId: string;
+  productId: string;
 }
 
 @Injectable()
-export class PurcahsesService {
+export class PurchasesService {
   constructor(private prisma: PrismaService, private kafka: KafkaService) {}
 
-  async listAllPurchases() {
-    return await this.prisma.purchase.findMany({
+  listAllPurchases() {
+    return this.prisma.purchase.findMany({
       orderBy: {
         createdAt: 'desc',
       },
     });
   }
 
-  async listAllPurchasesFromCustomer(customerId: string) {
-    return await this.prisma.purchase.findMany({
+  listAllFromCustomer(customerId: string) {
+    return this.prisma.purchase.findMany({
       where: {
         customerId,
       },
@@ -30,13 +31,15 @@ export class PurcahsesService {
     });
   }
 
-  async createPurchase({ productId, customerId }: CreatePurchaseParams) {
+  async createPurchase({ customerId, productId }: CreatePurchaseParams) {
     const product = await this.prisma.product.findUnique({
-      where: { id: productId },
+      where: {
+        id: productId,
+      },
     });
 
     if (!product) {
-      throw new Error('Product not found');
+      throw new Error('Product not found.');
     }
 
     const purchase = await this.prisma.purchase.create({

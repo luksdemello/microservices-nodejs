@@ -1,25 +1,25 @@
 import { UseGuards } from '@nestjs/common';
 import {
-  Resolver,
+  Args,
+  Mutation,
+  Parent,
   Query,
   ResolveField,
-  Parent,
-  Mutation,
-  Args,
+  Resolver,
 } from '@nestjs/graphql';
-import { AuthorizationGuard } from 'src/http/auth/authorization.guard';
-import { AuthUser, CurrentUser } from 'src/http/auth/current_user';
-import { CustomersService } from 'src/services/customers.service';
-import { ProductsService } from 'src/services/products.service';
-import { PurcahsesService } from 'src/services/purchases.service';
-import { CreatePurchasetInput } from '../inputs/create_purchase_input';
-import { Product } from '../models/product';
+import { CustomersService } from '../../../services/customers.service';
+import { ProductsService } from '../../../services/products.service';
+
+import { PurchasesService } from '../../../services/purchases.service';
+import { AuthorizationGuard } from '../../auth/authorization.guard';
+import { AuthUser, CurrentUser } from '../../auth/current-user';
+import { CreatePurchaseInput } from '../inputs/create-purchase-input';
 import { Purchase } from '../models/purchase';
 
 @Resolver(() => Purchase)
 export class PurchasesResolver {
   constructor(
-    private purchasesServices: PurcahsesService,
+    private purchasesService: PurchasesService,
     private productsService: ProductsService,
     private customersService: CustomersService,
   ) {}
@@ -27,10 +27,10 @@ export class PurchasesResolver {
   @Query(() => [Purchase])
   @UseGuards(AuthorizationGuard)
   purchases() {
-    return this.purchasesServices.listAllPurchases();
+    return this.purchasesService.listAllPurchases();
   }
 
-  @ResolveField(() => Product)
+  @ResolveField()
   product(@Parent() purchase: Purchase) {
     return this.productsService.getProductById(purchase.productId);
   }
@@ -38,10 +38,10 @@ export class PurchasesResolver {
   @Mutation(() => Purchase)
   @UseGuards(AuthorizationGuard)
   async createPurchase(
-    @Args('data') data: CreatePurchasetInput,
+    @Args('data') data: CreatePurchaseInput,
     @CurrentUser() user: AuthUser,
   ) {
-    let customer = await this.customersService.getCustumerByAuthUserId(
+    let customer = await this.customersService.getCustomerByAuthUserId(
       user.sub,
     );
 
@@ -51,9 +51,9 @@ export class PurchasesResolver {
       });
     }
 
-    return this.purchasesServices.createPurchase({
-      productId: data.productId,
+    return this.purchasesService.createPurchase({
       customerId: customer.id,
+      productId: data.productId,
     });
   }
 }
