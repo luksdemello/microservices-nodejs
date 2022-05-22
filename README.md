@@ -33,3 +33,7 @@ This is a microservices based application for the purpose of gaining knowledge w
 
 - [Auth] List courses I have access to
 - [Auth] Access course content
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
